@@ -102,7 +102,7 @@ const letterPatterns: Record<string, DotPattern> = {
 };
 
 export default function DotMatrixAnimation() {
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = useMediaQuery("(min-width: 1440px)");
 
   const [displayedLetters, setDisplayedLetters] = useState<number[]>([]);
   const [displayedDots, setDisplayedDots] = useState<Dot[]>([]);
