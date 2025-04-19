@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useMediaQuery } from "usehooks-ts";
 
 export default function SingerSelection() {
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = useMediaQuery("(min-width: 1440px)");
 
   const images = [
     "/sing1.jpg",
