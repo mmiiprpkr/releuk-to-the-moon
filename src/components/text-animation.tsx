@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useMediaQuery } from "usehooks-ts";
 
 type DotPattern = (0 | 1)[][];
 
@@ -101,6 +102,8 @@ const letterPatterns: Record<string, DotPattern> = {
 };
 
 export default function DotMatrixAnimation() {
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+
   const [displayedLetters, setDisplayedLetters] = useState<number[]>([]);
   const [displayedDots, setDisplayedDots] = useState<Dot[]>([]);
   const [animationDuration] = useState<number>(5);
@@ -109,8 +112,21 @@ export default function DotMatrixAnimation() {
   const completedDotsCount = useRef<number>(0);
   const animationFrameId = useRef<number | null>(null);
 
-  const text = "RALEUK TO THE MOON CONCERT";
-  const letters = text.split("");
+  const desktopText = "RALEUK TO THE MOON CONCERT";
+  const mobileText = ["RALEUK", "TO", "THE", "MOON", "CONCERT"];
+
+  const letters = isDesktop
+    ? desktopText.split("")
+    : mobileText.join(" ").split("");
+
+  const getGlobalLetterIndex = (wordIndex: number, localLetterIndex: number): number => {
+    let index = 0;
+    for (let i = 0; i < wordIndex; i++) {
+      index += mobileText[i].length;
+      index += 1; // Add space between words
+    }
+    return index + localLetterIndex;
+  };
 
   useEffect(() => {
     let totalDots = 0;
@@ -242,48 +258,90 @@ export default function DotMatrixAnimation() {
         <div
           className="relative rounded-lg p-4 mx-auto"
           style={{
-            width: `${totalWidth + 20}px`,
-            height: `${gridHeight + 20}px`,
+            width: isDesktop ? `${totalWidth + 20}px` : "auto",
+            height: "auto",
             overflow: "hidden",
           }}
         >
-          {/* คอนเทนเนอร์สำหรับตัวอักษร (จัดกลาง) */}
-          <div className="flex justify-center">
-            {letters.map((letter, letterIndex) => {
-              const letterWidth = getLetterWidth(letter);
+          {isDesktop ? (
+            // Desktop layout
+            <div className="flex justify-center">
+              {letters.map((letter, letterIndex) => {
+                const letterWidth = getLetterWidth(letter);
+                return (
+                  <div
+                    key={`letter-${letterIndex}`}
+                    className="relative"
+                    style={{
+                      width: `${letterWidth}px`,
+                      height: `${gridHeight}px`,
+                      marginRight: "7px",
+                    }}
+                  >
+                    {displayedDots
+                      .filter((dot) => dot.letterIndex === letterIndex)
+                      .map((dot) => (
+                        <motion.div
+                          key={`active-${letterIndex}-${dot.row}-${dot.col}`}
+                          className="absolute bg-white rounded-full"
+                          style={{
+                            width: `${dotSize}px`,
+                            height: `${dotSize}px`,
+                            left: `${dot.col * dotSpacing}px`,
+                            top: `${dot.row * dotSpacing}px`,
+                          }}
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ duration: 0.2 }}
+                        />
+                      ))}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            // Updated mobile layout
+            <div className="flex flex-col items-center gap-6">
+              {mobileText.map((word, wordIndex) => (
+                <div key={`word-${wordIndex}`} className="flex justify-center">
+                  {word.split("").map((letter, letterIndex) => {
+                    const letterWidth = getLetterWidth(letter);
+                    const globalLetterIndex = getGlobalLetterIndex(wordIndex, letterIndex);
 
-              return (
-                <div
-                  key={`letter-${letterIndex}`}
-                  className="relative"
-                  style={{
-                    width: `${letterWidth}px`,
-                    height: `${gridHeight}px`,
-                    marginRight: "7px",
-                    // marginRight: letterIndex < letters.length - 1 ? `${letterSpacing * dotSpacing}px` : '0'
-                  }}
-                >
-                  {displayedDots
-                    .filter((dot) => dot.letterIndex === letterIndex)
-                    .map((dot) => (
-                      <motion.div
-                        key={`active-${letterIndex}-${dot.row}-${dot.col}`}
-                        className="absolute bg-white rounded-full"
+                    return (
+                      <div
+                        key={`letter-${wordIndex}-${letterIndex}`}
+                        className="relative"
                         style={{
-                          width: `${dotSize}px`,
-                          height: `${dotSize}px`,
-                          left: `${dot.col * dotSpacing}px`,
-                          top: `${dot.row * dotSpacing}px`,
+                          width: `${letterWidth}px`,
+                          height: `${gridHeight}px`,
+                          marginRight: letterIndex < word.length - 1 ? "7px" : "0",
                         }}
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.2 }}
-                      />
-                    ))}
+                      >
+                        {displayedDots
+                          .filter((dot) => dot.letterIndex === globalLetterIndex)
+                          .map((dot) => (
+                            <motion.div
+                              key={`active-${wordIndex}-${letterIndex}-${dot.row}-${dot.col}`}
+                              className="absolute bg-white rounded-full"
+                              style={{
+                                width: `${dotSize}px`,
+                                height: `${dotSize}px`,
+                                left: `${dot.col * dotSpacing}px`,
+                                top: `${dot.row * dotSpacing}px`,
+                              }}
+                              initial={{ scale: 0, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{ duration: 0.2 }}
+                            />
+                          ))}
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

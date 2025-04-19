@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useMediaQuery } from "usehooks-ts";
 
 export default function SingerSelection() {
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+
   const images = [
     "/sing1.jpg",
     "/sing2.jpg",
@@ -24,14 +27,17 @@ export default function SingerSelection() {
     }),
   };
 
+  const imagesTop = isDesktop ? images.slice(0, 3) : images.slice(0, 2);
+  const imagesBottom = isDesktop ? images.slice(3) : images.slice(2);
+
   return (
-    <div className="absolute inset-0 flex items-center justify-center">
+    <div className="absolute inset-0 flex items-center justify-center p-4">
       <div className="flex flex-col">
-        <div className="flex gap-x-6 justify-center">
-          {images.slice(0, 3).map((image, index) => (
+        <div className="flex gap-3 md:gap-6 justify-center flex-wrap">
+          {imagesTop.map((image, index) => (
             <motion.div
               key={index}
-              className="relative w-[250px] h-[320px]"
+              className="relative w-[150px] h-[200px] md:w-[250px] md:h-[320px]"
               variants={imageVariants}
               initial="hidden"
               animate="visible"
@@ -46,11 +52,11 @@ export default function SingerSelection() {
             </motion.div>
           ))}
         </div>
-        <div className="flex gap-6 justify-center mt-6">
-          {images.slice(3, 5).map((image, index) => (
+        <div className="flex gap-3 mt-3 md:gap-6 md:mt-6 justify-center flex-wrap">
+          {imagesBottom.map((image, index) => (
             <motion.div
               key={index}
-              className="relative w-[250px] h-[320px]"
+              className="relative w-[150px] h-[200px] md:w-[250px] md:h-[320px]"
               variants={imageVariants}
               initial="hidden"
               animate="visible"
