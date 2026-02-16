@@ -12,4 +12,4 @@ echo "🚀 Triggering remote build..."
 git add .
 git commit -m "redeploy: manual trigger $(date)"
 
-git push
+git push origin dev
